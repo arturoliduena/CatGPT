@@ -1,7 +1,7 @@
-from pydantic_settings import BaseSettings, SettingsConfigDict
-from openai import OpenAI
 import requests
 import structlog
+from openai import OpenAI
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 _logger = structlog.get_logger()
 
