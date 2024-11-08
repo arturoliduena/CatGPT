@@ -14,6 +14,7 @@ pydantic = "^2.9.2"
 pydantic-settings = "^2.6.1"
 openai = "^1.54.3"
 requests = "^2.32.3"
+structlog = "^24.4.0"
 
 
 [build-system]
