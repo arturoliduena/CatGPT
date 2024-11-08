@@ -5,6 +5,7 @@ from fastapi import APIRouter
 
 from app.api.utils.opendata import get_open_data
 from app.clients.models import TextGeneration
+from supabase_con.connect import connect
 
 _logger = structlog.get_logger()
 router = APIRouter()
@@ -31,3 +32,13 @@ async def root():
     ]
 
     return text_generation.generate_text(messages=messages)
+
+@router.get("/municipalities")
+async def municipalities():
+    _logger.info("GET /municipalities")
+    conn = connect()
+    cur = conn.cursor()
+
+    cur.execute('SELECT codimuni, nommuni FROM municipalities')
+    result = cur.fetchall() 
+    return result

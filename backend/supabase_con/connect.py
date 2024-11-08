@@ -1,5 +1,5 @@
 import psycopg2
-from supabase.config import get_config
+from supabase_con.config import get_config
 
 
 def connect():
