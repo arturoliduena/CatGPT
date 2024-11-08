@@ -123,36 +123,36 @@ class Translation(OpenAIClient):
 
 
 # Usage examples
-text_gen = TextGeneration(
-    base_url="https://hijbc1ux6ie03ouo.us-east-1.aws.endpoints.huggingface.cloud",
-)
-result_gen = text_gen.generate_text(
-    messages=[
-        {
-            "role": "system",
-            "content": "Ets un asistent que ajuda als ajuntaments a donar avisos a la ciutadania.",
-        },
-        {
-            "role": "user",
-            "content": "Soc l'alcalde de Barcelona i vull enviar un missatge a la ciutadania sobre les inundacions.",
-        },
-    ],
-)
-print("Text generation:")
-print(result_gen)
+# text_gen = TextGeneration(
+#     base_url="https://hijbc1ux6ie03ouo.us-east-1.aws.endpoints.huggingface.cloud",
+# )
+# result_gen = text_gen.generate_text(
+#     messages=[
+#         {
+#             "role": "system",
+#             "content": "Ets un asistent que ajuda als ajuntaments a donar avisos a la ciutadania.",
+#         },
+#         {
+#             "role": "user",
+#             "content": "Soc l'alcalde de Barcelona i vull enviar un missatge a la ciutadania sobre les inundacions.",
+#         },
+#     ],
+# )
+# print("Text generation:")
+# print(result_gen)
 
-tts = TextToSpeech(
-    api_url="https://p1b28cv1e843tih1.eu-west-1.aws.endpoints.huggingface.cloud/api/tts"
-)
-response = tts.generate_audio("Bon dia Roger i Arturo, com esteu?")
-with open("output.wav", "wb") as f:
-    f.write(response)
+# tts = TextToSpeech(
+#     api_url="https://p1b28cv1e843tih1.eu-west-1.aws.endpoints.huggingface.cloud/api/tts"
+# )
+# response = tts.generate_audio("Bon dia Roger i Arturo, com esteu?")
+# with open("output.wav", "wb") as f:
+#     f.write(response)
 
-translation = Translation(
-    base_url="https://o9vasr2oal4oyt2j.us-east-1.aws.endpoints.huggingface.cloud"
-)
-result_trans = translation.translate_text(
-    src_lang_code="Catalan", tgt_lang_code="English", sentence=result_gen
-)
-print("Translation:")
-print(result_trans)
+# translation = Translation(
+#     base_url="https://o9vasr2oal4oyt2j.us-east-1.aws.endpoints.huggingface.cloud"
+# )
+# result_trans = translation.translate_text(
+#     src_lang_code="Catalan", tgt_lang_code="English", sentence=result_gen
+# )
+# print("Translation:")
+# print(result_trans)

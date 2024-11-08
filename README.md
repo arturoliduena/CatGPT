@@ -6,6 +6,7 @@
 
 - FastAPI
 - Supabase per la base de dades Postgres amb l'extensió per dades georeferenciades PostGIS
+- Docling pdf parser
 
 #### APIs
 

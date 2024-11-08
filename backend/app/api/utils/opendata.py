@@ -1,14 +1,23 @@
 import requests
 import structlog
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 _logger = structlog.get_logger()
 
 
-async def get_open_data():
-    url = "https://opendata.aemet.es/opendata/api/prediccion/especifica/montaña/pasada/area/peu1"
-    headers = {
-        "api_key": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJydmVjaWFuYUBnbWFpbC5jb20iLCJqdGkiOiI3YTZiYjFjYi1lZDc4LTQ5NTUtYjI5Ni05YTliY2ZiZGQ1YzIiLCJpc3MiOiJBRU1FVCIsImlhdCI6MTczMDM5NjYyNywidXNlcklkIjoiN2E2YmIxY2ItZWQ3OC00OTU1LWIyOTYtOWE5YmNmYmRkNWMyIiwicm9sZSI6IiJ9.USMSRChqiP-HIMSBsmyLvBpSZXzLolqaNC1eP28mUfI"
-    }
+class ModelsSettings(BaseSettings):
+
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+    hf_token: str
+    open_data_api_key: str
+
+
+settings = ModelsSettings()
+
+
+async def get_open_data(municipe_code: str):
+    url = f"https://opendata.aemet.es/opendata/api/prediccion/especifica/municipio/horaria/{municipe_code}"
+    headers = {"api_key": settings.open_data_api_key}
     res = requests.get(url, headers=headers)
     res_json = res.json()
     res = requests.get(res_json["datos"])
