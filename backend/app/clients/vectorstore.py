@@ -1,17 +1,11 @@
-from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain_community.vectorstores import SupabaseVectorStore
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from langchain_huggingface import HuggingFaceEmbeddings
+
+from langchain_core.documents import Document
 import structlog
-from supabase.client import Client, create_client
+
+from langchain_milvus import Milvus
 
 _logger = structlog.get_logger()
-
-
-class SupabaseConfig(BaseSettings):
-
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
-    supabase_url: str
-    supabase_key: str
 
 
 class VectorStore:
@@ -19,15 +13,21 @@ class VectorStore:
 
     def __init__(
         self,
-        settings: SupabaseConfig = SupabaseConfig(),
+        drop_old: bool = False,
     ):
-        self.embeddings = HuggingFaceEmbeddings(
+        embeddings = HuggingFaceEmbeddings(
             model_name=self.embeddings_model, model_kwargs={"device": "cpu"}
         )
-        self.client: Client = create_client(
-            settings.supabase_url, settings.supabase_key
+        self._vectorstore = Milvus(
+            embedding_function=embeddings,
+            connection_args={"uri": f"./milvus.db"},
+            drop_old=drop_old,
+            auto_id=True,
         )
-        _logger.info("RAG loaded!")
+        _logger.info("VectorStore initialized")
+
+    def add_documents(self, documents: list[Document]):
+        self._vectorstore.add_documents(documents)
 
 
-VectorStore()
+# VectorStore()
