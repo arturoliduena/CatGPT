@@ -8,7 +8,7 @@ packages = [{include = "poetry_demo"}]
 
 [tool.poetry.dependencies]
 python = "^3.12"
-fastapi = "^0.115.4"
+fastapi = {extras = ["standard"], version = "^0.115.4"}
 uvicorn = "^0.32.0"
 pydantic = "^2.9.2"
 pydantic-settings = "^2.6.1"
