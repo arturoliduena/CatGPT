@@ -166,3 +166,4 @@ cython_debug/
 milvus.db
 .milvus.db.lock
 .DS_Store
+*.wav

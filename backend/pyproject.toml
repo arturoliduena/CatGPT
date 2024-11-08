@@ -4,11 +4,11 @@ version = "0.1.0"
 description = ""
 authors = ["CatGPT"]
 readme = "README.md"
-packages = [{include = "poetry_demo"}]
+packages = [{ include = "app" }]
 
 [tool.poetry.dependencies]
 python = "^3.12"
-fastapi = {extras = ["standard"], version = "^0.115.4"}
+fastapi = { extras = ["standard"], version = "^0.115.4" }
 uvicorn = "^0.32.0"
 pydantic = "^2.9.2"
 pydantic-settings = "^2.6.1"
@@ -25,6 +25,9 @@ langchain-text-splitters = "^0.3.2"
 langchain-huggingface = "^0.1.2"
 langchain-milvus = "^0.1.6"
 certifi = "^2024.8.30"
+
+[tool.poetry.scripts]
+start = "app.main:app"
 
 
 [tool.poetry.group.dev.dependencies]
