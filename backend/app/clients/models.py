@@ -8,7 +8,7 @@ _logger = structlog.get_logger()
 
 class ModelsSettings(BaseSettings):
 
-    model_config = SettingsConfigDict(env_file=".env")
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
     hf_token: str
 
 
