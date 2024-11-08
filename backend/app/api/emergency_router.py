@@ -14,9 +14,11 @@ router = APIRouter()
 
 class PrecipitationSummaryParams(BaseModel):
     municipe_code: str = Field(..., description="The code of the municipality")
+    alert_message: str = Field(..., description="The code of the municipality")
 
 
-@router.get("/forecast-summary")
+
+@router.post("/forecast-summary")
 async def get_forecast_summary(params: PrecipitationSummaryParams = Depends()):
     _logger.info("GET /forcast-summary", municipe_code=params.municipe_code)
     open_data = await get_open_data(params.municipe_code)
@@ -61,3 +63,4 @@ async def municipalities():
     cur.execute('SELECT codimuni, nommuni FROM municipalities')
     result = cur.fetchall() 
     return result
+
