@@ -10,19 +10,19 @@ class OverpassSettings(BaseSettings):
 
 
 class Overpass:
-
+    # https://wiki.openstreetmap.org/wiki/Key:amenity
     AMENITY_LIST = [
         "school",
-        "college",
-        "kindergarten",
-        "library",
-        "university",
-        "clinic",
         "hospital",
-        "veterinary",
-        "cinema",
-        "place_of_worship",
-        "refugee_site"
+        # "college",
+        # "kindergarten",
+        # "library",
+        # "university",
+        # "clinic",
+        # "veterinary",
+        # "cinema",
+        # "place_of_worship",
+        # "refugee_site"
     ]
 
     def __init__(

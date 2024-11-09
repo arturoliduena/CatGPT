@@ -27,7 +27,7 @@ async def fetch_weather_data(municipe_code: str):
 def format_risk_points(municipe_code: str):
     riskpoints = riskpoint_service.get_riskpoint(municipe_code)
     return "\n".join(
-        f"{rp['amenity'].capitalize()}: {rp['name']} (Ref: {rp['ref']})"
+        f"{rp['amenity'].capitalize()}: {rp['name']}"
         for rp in riskpoints
     )
 
@@ -60,13 +60,18 @@ def translate_docs(base_url):
 async def generate_alert(params: PrecipitationSummaryParams = Body()):
     _logger.info("POST /generate-alert", municipe_code=params.municipe_code)
     # Fetch data and risk points
+    _logger.info("Get weather data...")
     open_data = await fetch_weather_data(params.municipe_code)
     _logger.info("Open data", open_data=open_data)
+
+    _logger.info("Get risk points...")
     riskpoints_text = format_risk_points(params.municipe_code)
+
+    _logger.info("Translate documents...")
     similar_docs_text = translate_docs(base_url)
-    text_generation = TextGeneration(
-        base_url=base_url,
-    )
+
+    _logger.info("Generating text...")
+    text_generation = TextGeneration(base_url)
 
     # Define a more structured, human-readable system message
     system_message = (

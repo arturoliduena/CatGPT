@@ -21,6 +21,10 @@ def get_riskpoint(municipality_code: str) -> List[Dict]:
         for _response in response:
             riskpoints.append(_response)
 
+        # TODO Como se demora mucho, al encontrar al menos un amenity deja de buscar mas
+        if len(riskpoints) > 0:
+            break
+
     return riskpoints
 
 
