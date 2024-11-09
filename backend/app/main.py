@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from app.api.forecast_summary import router as forecast_summary_router
 from app.api.generate_alert import router as generate_alert_router
@@ -7,7 +8,6 @@ from app.api.municipality_router import router as municipality_router
 from app.api.riskpoint_router import router as riskpoint_router
 from app.api.poi_router import router as poi_router
 from app.api.floodzones import router as floodzones_router
-
 
 
 app = FastAPI(title="CatGPT API", debug=True, version="1.0.0")
@@ -30,3 +30,4 @@ app.include_router(municipality_router, tags=["municipality"])
 app.include_router(poi_router, tags=["poi"])
 app.include_router(floodzones_router, tags=["floodzones"])
 
+app.mount("/static", StaticFiles(directory="static"), name="static")

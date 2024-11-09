@@ -1,4 +1,5 @@
 import ast
+from uuid import uuid4
 
 import structlog
 from fastapi import APIRouter, Body, Depends
@@ -8,6 +9,7 @@ from app.api.poi_router import get_poi_list_for_LLM
 from app.clients.models import TextGeneration, Translation
 from app.clients.vectorstore import VectorStore
 from app.services.opendata import get_open_data
+from app.clients.models import TextToSpeech
 
 _logger = structlog.get_logger()
 router = APIRouter()
@@ -20,6 +22,7 @@ class PrecipitationSummaryParams(BaseModel):
     severity: str = Field(..., description="The severity of the alert")
     target_audience: str = Field(..., description="The target audience of the alert")
     languages: str = Field(..., description="List of languages, separated by commas")
+
 
 mock_weather_data_res = " {'origen': {'productor': 'Agencia Estatal de Meteorología - AEMET. Gobierno de España', 'web': 'https://www.aemet.es', 'enlace': 'https://www.aemet.es/es/eltiempo/prediccion/municipios/horas/melide-id15046', 'language': 'es', 'copyright': '© AEMET. Autorizado el uso de la información y su reproducción citando a AEMET como autora de la misma.', 'notaLegal': 'https://www.aemet.es/es/nota_legal'}, 'elaborado': '2024-11-09T06:52:12', 'nombre': 'Melide', 'provincia': 'A Coruña', 'prediccion': {'dia': [{'fecha': '2024-11-10T00:00:00', 'estadoCielo': [{'value': '16n', 'periodo': '00', 'descripcion': 'Cubierto'}], 'precipitacion': [{'value': '5', 'periodo': '00'}], 'probPrecipitacion': [{'value': '85', 'periodo': '0001'}], 'probTormenta': [{'value': '20', 'periodo': '0001'}], 'nieve': [{'value': '0', 'periodo': '00'}], 'probNieve': [{'value': '0', 'periodo': '0001'}], 'temperatura': [{'value': '15', 'periodo': '00'}], 'sensTermica': [{'value': '14', 'periodo': '00'}], 'humedadRelativa': [{'value': '90', 'periodo': '00'}], 'vientoAndRachaMax': [{'direccion': ['O'], 'velocidad': ['10'], 'periodo': '00'}, {'value': '20', 'periodo': '00'}], 'orto': '08:00', 'ocaso': '18:00'}]}, 'id': '15046', 'version': '1.0'}"
 
@@ -98,7 +101,7 @@ async def generate_alert(
     )
 
     # Fetch data and risk points
-    open_data = await fetch_weather_data(params.municipe_code)
+    # open_data = await fetch_weather_data(params.municipe_code)
 
     riskpoints_text = format_risk_points(params.municipe_code)
 
@@ -125,19 +128,37 @@ async def generate_alert(
 
     _logger.info("Text generation:", result=result)
 
-    final_result = {"Catalan": result}
+    final_result = {"alerts": {"Catalan": result}}
 
     translation = Translation(
-                base_url="https://o9vasr2oal4oyt2j.us-east-1.aws.endpoints.huggingface.cloud"
-            )
-    
-    if len(params.languages.split(",")) > 0:
+        base_url="https://o9vasr2oal4oyt2j.us-east-1.aws.endpoints.huggingface.cloud"
+    )
+    _logger.info("Translating text to other languages", languages=params.languages)
+
+    # translate model does not like new lines, replace them with another character and then replace them back
+    aux_result = result.replace("\n", "§")
+    if params.languages and len(params.languages.split(",")) > 0:
         for language in params.languages.split(","):
-            
+
             result_trans = translation.translate_text(
-                src_lang_code="Catalan", tgt_lang_code="English", sentence=result
+                src_lang_code="Catalan", tgt_lang_code=language, sentence=aux_result
             )
-            final_result[language]=result_trans
- 
+            result_trans = result_trans.replace("§", "\n")
+            final_result["alerts"][language] = result_trans
+
+    # Generate audio file
+    tts = TextToSpeech(
+        api_url="https://p1b28cv1e843tih1.eu-west-1.aws.endpoints.huggingface.cloud/api/tts"
+    )
+    response = tts.generate_audio(result[:500])
+    # generate a random file name
+    file_name = str(uuid4()) + ".wav"
+    with open(f"static/{file_name}", "wb") as f:
+        f.write(response)
+
+    final_result["audioUrl"] = f"http://127.0.0.1:8000/static/{file_name}"
+
+    # Add CSS class for smaller audio buttons
+    final_result["audioButtonClass"] = "small-audio-button"
 
     return final_result

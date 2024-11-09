@@ -17,7 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Send, Shield } from "lucide-react";
+import { Send, Shield, Play, Pause, Square } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useMemo, useState } from "react";
 import { Municipalities, Municipality } from "./municipalities";
@@ -42,13 +42,26 @@ const languageOptions = [
   { label: "Asturià", value: "Asturian" },
 ];
 
+const languageMap = {
+  Catalan: "Català",
+  Spanish: "Espanyol",
+  English: "Anglès",
+  Euskera: "Euskera",
+  Galician: "Gallec",
+  Aranese: "Aranès",
+  Aragonese: "Aragonès",
+  Asturian: "Asturià",
+};
+
 export function FloodGuard() {
   const [situation, setSituation] = useState("");
   const [severity, setSeverity] = useState("moderada");
   const [audience, setAudience] = useState("general");
   const [showLanguage, setShowLanguage] = useState("Catalan");
   const [languages, setLanguages] = useState<string[]>([]);
-  const [generatedAlert, setGeneratedAlert] = useState({"Catalan": ""});
+  const [generatedAlert, setGeneratedAlert] = useState<{
+    [key: string]: string;
+  }>();
   const [bounds, setBounds] = useState<[[number, number], [number, number]]>([
     [41.324, 2.083],
     [41.424, 2.223],
@@ -61,8 +74,31 @@ export function FloodGuard() {
     useState<Municipality>();
   const [isGenerating, setIsGenerating] = useState(false);
 
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
+
+  const handlePlay = () => {
+    if (audio) {
+      audio.play();
+    }
+  };
+
+  const handlePause = () => {
+    if (audio) {
+      audio.pause();
+    }
+  };
+
+  const handleStop = () => {
+    if (audio) {
+      audio.pause();
+      audio.currentTime = 0;
+    }
+  };
+
   const handleGenerateAlert = async () => {
     setIsGenerating(true);
+    setGeneratedAlert(undefined);
     let hasError = false;
 
     if (!selectedMunicipality) {
@@ -97,8 +133,12 @@ export function FloodGuard() {
         languages.join(",")
       );
       console.log("Alert generated:", response);
-      console.log("------>",response)
-      setGeneratedAlert(response);
+      console.log("------>", response);
+      setGeneratedAlert(response.alerts);
+      if (response.audioUrl) {
+        setAudioUrl(response.audioUrl);
+        setAudio(new Audio(response.audioUrl));
+      }
     } catch (error) {
       console.error("Error generating alert:", error);
       alert("Hi ha hagut un error en generar l'alerta.");
@@ -230,29 +270,47 @@ export function FloodGuard() {
               Generar Alerta
             </Button>
             {generatedAlert && (
-              <div className="mt-4 p-4 bg-yellow-100 rounded-lg border border-yellow-300">
-                {Object.keys(generatedAlert).length>1&&
-                <Select value={showLanguage} onValueChange={setShowLanguage}>
-                   <SelectTrigger id="showlanguage" className="mt-1">
-                    <SelectValue placeholder="Idioma a visualitzar" />
-                  </SelectTrigger>
-                  <SelectContent>
-                  {Object.keys(generatedAlert).map(
-                    d=><SelectItem value={d}>{d}</SelectItem>
-                  )}
-                    
-                  </SelectContent>
-                </Select>
+              <div className="mt-4 p-4 rounded-lg border border-gray-200">
+                {Object.keys(generatedAlert).length >= 1 && (
+                  <div className="flex items-center justify-between p-1 space-x-2">
+                    <Select
+                      value={showLanguage}
+                      onValueChange={setShowLanguage}
+                    >
+                      <SelectTrigger id="showlanguage" className="mt-1">
+                        <SelectValue placeholder="Idioma a visualitzar" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.keys(generatedAlert).map((d) => (
+                          <SelectItem key={d} value={d}>
+                            {languageMap[d] || d}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {showLanguage === "Catalan" && audioUrl && (
+                      <div className="flex space-x-1 items-center justify-center">
+                        <Button onClick={handlePlay} className="h-7 w-6">
+                          <Play className="h-3 w-3" />
+                        </Button>
+                        <Button onClick={handlePause} className="h-7 w-6">
+                          <Pause className="h-3 w-3" />
+                        </Button>
+                        <Button onClick={handleStop} className="h-7 w-6">
+                          <Square className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                )}
 
-                } 
-                <h3 className="font-bold text-lg mb-2 text-yellow-800">
-                  Alerta Generada:
-                </h3>
-                <p className="text-yellow-900">
-                  {generatedAlert[showLanguage].split("\n").map((line, index) => (
-                    <span key={index}>{line || <br />}</span>
-                  ))}
-                </p>
+                <div className="text-gray-900 p-1">
+                  {generatedAlert[showLanguage]
+                    .split("\n")
+                    .map((line, index) => (
+                      <p key={index}>{line || <br />}</p>
+                    ))}
+                </div>
               </div>
             )}
           </CardContent>
