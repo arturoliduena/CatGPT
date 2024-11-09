@@ -46,8 +46,9 @@ export function FloodGuard() {
   const [situation, setSituation] = useState("");
   const [severity, setSeverity] = useState("moderada");
   const [audience, setAudience] = useState("general");
+  const [showLanguage, setShowLanguage] = useState("Catalan");
   const [languages, setLanguages] = useState<string[]>([]);
-  const [generatedAlert, setGeneratedAlert] = useState("");
+  const [generatedAlert, setGeneratedAlert] = useState({"Catalan": ""});
   const [bounds, setBounds] = useState<[[number, number], [number, number]]>([
     [41.324, 2.083],
     [41.424, 2.223],
@@ -97,7 +98,7 @@ export function FloodGuard() {
       );
       console.log("Alert generated:", response);
       console.log("------>",response)
-      setGeneratedAlert(response['Catalan']);
+      setGeneratedAlert(response);
     } catch (error) {
       console.error("Error generating alert:", error);
       alert("Hi ha hagut un error en generar l'alerta.");
@@ -230,12 +231,26 @@ export function FloodGuard() {
             </Button>
             {generatedAlert && (
               <div className="mt-4 p-4 bg-yellow-100 rounded-lg border border-yellow-300">
+                {Object.keys(generatedAlert).length>1&&
+                <Select value={showLanguage} onValueChange={setShowLanguage}>
+                   <SelectTrigger id="showlanguage" className="mt-1">
+                    <SelectValue placeholder="Idioma a visualitzar" />
+                  </SelectTrigger>
+                  <SelectContent>
+                  {Object.keys(generatedAlert).map(
+                    d=><SelectItem value={d}>{d}</SelectItem>
+                  )}
+                    
+                  </SelectContent>
+                </Select>
+
+                } 
                 <h3 className="font-bold text-lg mb-2 text-yellow-800">
                   Alerta Generada:
                 </h3>
                 <p className="text-yellow-900">
-                  {generatedAlert.split("\n").map((line, index) => (
-                    <p key={index}>{line || <br />}</p>
+                  {generatedAlert[showLanguage].split("\n").map((line, index) => (
+                    <span key={index}>{line || <br />}</span>
                   ))}
                 </p>
               </div>
