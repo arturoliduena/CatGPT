@@ -17,6 +17,23 @@ export const fetchFloodZones = async (codeMunicipality: string) => {
   return res.json() as Promise<FloodableZone[]>;
 };
 
+export interface POI {
+  municipalityName: string;
+  municipalityCode: string;
+  amenity: string;
+  floodable: boolean;
+  name: string;
+  lon: string;
+  lat: string;
+}
+
+export const fetchPOI = async (codeMunicipality: string) => {
+  const res = await fetch(
+    `http://localhost:8000/municipalities/${codeMunicipality}/poi`
+  );
+  return res.json() as Promise<POI[]>;
+};
+
 export const sendAlert = async (
   municipeCode: string,
   alertMessage: string,

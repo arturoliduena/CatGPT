@@ -34,11 +34,11 @@ async def municipalities(municipality_code: str = Path(...)):
     conn = connect()
     cur = conn.cursor()
 
-    cur.execute(f"SELECT codimuni, nommuni, amenity, intersects_floodzone, st_asewkt(wkb_geometry) as geom, name FROM public.poi where codimuni = '{municipality_code}'")
+    cur.execute(f"SELECT codimuni, nommuni, amenity, intersects_floodzone, ST_X(wkb_geometry) as lon, ST_Y(wkb_geometry) as lat, name FROM public.poi where codimuni = '{municipality_code}'")
     data = cur.fetchall()
 
     result = []
     for muni in data:
-        result.append({"codiMunicipi": muni[0], "nomMunicipi": muni[1], "amenity": amenities_dict[muni[2]], "floodable": muni[3], "geom": muni[4], "name": muni[5]})
+        result.append({"municipalityCode": muni[0], "municipalityName": muni[1], "amenity": amenities_dict[muni[2]], "floodable": muni[3], "lon": muni[4], "lat": muni[5], "name": muni[6]})
 
     return result

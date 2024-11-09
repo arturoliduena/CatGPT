@@ -3,13 +3,14 @@ import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import "leaflet-defaulticon-compatibility";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
-import { FloodableZone } from "@/lib/queries";
+import { FloodableZone, POI } from "@/lib/queries";
 
 const MapComponent = ({
-  bounds,floodableZones
+  bounds,floodableZones, poi
 }: {
   bounds: [[number, number], [number, number]];
-  floodableZones:FloodableZone[]
+  floodableZones:FloodableZone[],
+  poi: POI[]
 }) => {
   const map = useMap();
   useEffect(() => {
@@ -26,12 +27,35 @@ const MapComponent = ({
 
        floodableZones.forEach((zone) => {
         const geoJsonData = JSON.parse(zone.geom); 
-        console.log("----", geoJsonData)
         L.geoJSON(geoJsonData).addTo(map);
       });
     }
 
   }, [floodableZones, map])
+
+  useEffect(()=>{
+    if ( poi.length > 0) {
+      map.eachLayer((layer: any) => {
+        if (layer instanceof L.CircleMarker) {
+          map.removeLayer(layer);
+        }
+       });
+
+       poi.forEach((zone) => {
+        const color = zone.floodable ? "red" : "green";
+        L.circleMarker([zone.lat, zone.lon], {
+          color: color,
+          fillColor: color,
+          radius: 8, // Size of the CircleMarker
+          fillOpacity: 0.6,
+        })
+        .addTo(map)
+        .bindPopup(`${zone.amenity} <b>${zone.name}</b><br>inundable: ${zone.floodable}`);
+      });
+    }
+
+  }, [poi, map])
+
 
   return null;
 };
@@ -39,9 +63,9 @@ const MapComponent = ({
 
 
 export default function MyMap({
-  initialBounds, floodableZones=[]
+  initialBounds, floodableZones=[], poi=[]
 }: {
-  initialBounds: [number, number][];floodableZones:FloodableZone[]
+  initialBounds: [number, number][];floodableZones:FloodableZone[], poi:POI[]
 }) {
   const [bounds, setBounds] = useState<[number, number][]>(initialBounds);
   useEffect(() => {
@@ -56,7 +80,7 @@ export default function MyMap({
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
       />
-      <MapComponent bounds={bounds} floodableZones={floodableZones}/>
+      <MapComponent bounds={bounds} floodableZones={floodableZones} poi={poi}/>
     </MapContainer>
   );
 }
