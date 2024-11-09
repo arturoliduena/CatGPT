@@ -31,26 +31,6 @@ import {
 } from "@/lib/queries";
 import { ClipLoader } from "react-spinners";
 
-// Placeholder function for fetching dynamic metrics
-const fetchDynamicMetrics = async (city: string) => {
-  // This would typically be an API call
-  return {
-    weatherCondition: "Pluja Forta",
-    waterLevel: "2.5m",
-    rainFall: "100mm/hr",
-  };
-};
-
-// Placeholder function for generating alert with LLM
-const generateAlertWithLLM = async (
-  situation: string,
-  metrics: any,
-  customizations: any
-) => {
-  // This would typically involve an API call to an LLM service
-  return `ALERTA D'INUNDACIÓ: ${situation} a ${customizations.city}. Nivell d'aigua actual: ${metrics.waterLevel}. Severitat: ${customizations.severity}. Mantingueu-vos segur i seguiu les instruccions de les autoritats locals.`;
-};
-
 const languageOptions = [
   { label: "Català", value: "Catalan" },
   { label: "Espanyol", value: "Spanish" },
