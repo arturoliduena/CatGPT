@@ -6,7 +6,6 @@ from pydantic import BaseModel, Field
 
 from app.api.utils.opendata import get_open_data
 from app.clients.models import TextGeneration
-from supabase_con.connect import connect
 
 _logger = structlog.get_logger()
 router = APIRouter()
@@ -15,7 +14,6 @@ router = APIRouter()
 class PrecipitationSummaryParams(BaseModel):
     municipe_code: str = Field(..., description="The code of the municipality")
     alert_message: str = Field(..., description="The code of the municipality")
-
 
 
 @router.post("/forecast-summary")
@@ -53,14 +51,3 @@ async def get_forecast_summary(params: PrecipitationSummaryParams = Depends()):
         },
     ]
     return text_generation.generate_text(messages=messages)
-
-@router.get("/municipalities")
-async def municipalities():
-    _logger.info("GET /municipalities")
-    conn = connect()
-    cur = conn.cursor()
-
-    cur.execute('SELECT codimuni, nommuni FROM municipalities')
-    result = cur.fetchall() 
-    return result
-

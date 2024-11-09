@@ -1,7 +1,7 @@
 from configparser import ConfigParser
 
 
-def get_config(config_file='./config.ini', section=None):
+def get_config(config_file='./../config.ini', section=None):
     parser = ConfigParser()
     parser.read(config_file)
 
@@ -20,5 +20,5 @@ def get_config(config_file='./config.ini', section=None):
 
 
 if __name__ == "__main__":
-    print(get_config('./config.ini'))
-    print(get_config('./config.ini', 'postgresql'))
+    print(get_config('./../config.ini'))
+    print(get_config('./../config.ini', 'postgresql'))

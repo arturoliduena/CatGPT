@@ -7,6 +7,6 @@ from app.services import riskpoint_service
 router = APIRouter()
 
 
-@router.get("/municipality/{municipality_code}/riskpoints")
-async def get_riskpoints(municipality_code: int = Path(...)) -> List[Dict]:
+@router.get("/municipalities/{municipality_code}/riskpoints")
+async def get_riskpoints(municipality_code: str = Path(...)) -> List[Dict]:
     return riskpoint_service.get_riskpoint(municipality_code)

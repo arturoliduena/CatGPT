@@ -23,7 +23,7 @@ class Overpass:
         if response.status_code == 200:
             return self._parse_response(response.json())
         else:
-            raise Exception("Riskpoints not found")
+            return []
 
     def _build_base_url(self) -> str:
         return f'{self.overpass_url}/api/interpreter?data=[out:json][timeout:25000];nwr["amenity"="school"]'
