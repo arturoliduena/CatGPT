@@ -30,6 +30,7 @@ import {
   sendAlert,
 } from "@/lib/queries";
 import { ClipLoader } from "react-spinners";
+import Markdown from "react-markdown";
 
 const languageOptions = [
   { label: "Espanyol", value: "Spanish" },
@@ -43,7 +44,7 @@ const languageOptions = [
 
 export function FloodGuard() {
   const [situation, setSituation] = useState("");
-  const [severity, setSeverity] = useState("moderate");
+  const [severity, setSeverity] = useState("moderada");
   const [audience, setAudience] = useState("general");
   const [languages, setLanguages] = useState<string[]>([]);
   const [generatedAlert, setGeneratedAlert] = useState("");
@@ -174,10 +175,10 @@ export function FloodGuard() {
                     <SelectValue placeholder="Seleccioneu la severitat" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="low">Baixa</SelectItem>
-                    <SelectItem value="moderate">Moderada</SelectItem>
-                    <SelectItem value="high">Alta</SelectItem>
-                    <SelectItem value="extreme">Extrema</SelectItem>
+                    <SelectItem value="baixa">Baixa</SelectItem>
+                    <SelectItem value="moderada">Moderada</SelectItem>
+                    <SelectItem value="alta">Alta</SelectItem>
+                    <SelectItem value="extrema">Extrema</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -191,10 +192,10 @@ export function FloodGuard() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="general">Públic General</SelectItem>
-                    <SelectItem value="emergency">
+                    <SelectItem value="serveis d'emergencia">
                       Serveis d'Emergència
                     </SelectItem>
-                    <SelectItem value="authorities">
+                    <SelectItem value="autoritats locals">
                       Autoritats Locals
                     </SelectItem>
                   </SelectContent>
@@ -232,7 +233,11 @@ export function FloodGuard() {
                 <h3 className="font-bold text-lg mb-2 text-yellow-800">
                   Alerta Generada:
                 </h3>
-                <p className="text-yellow-900">{generatedAlert}</p>
+                <p className="text-yellow-900">
+                  {generatedAlert.split("\n").map((line, index) => (
+                    <p key={index}>{line || <br />}</p>
+                  ))}
+                </p>
               </div>
             )}
           </CardContent>
