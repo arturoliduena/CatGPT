@@ -32,7 +32,6 @@ import {
 import { ClipLoader } from "react-spinners";
 
 const languageOptions = [
-  { label: "Català", value: "Catalan" },
   { label: "Espanyol", value: "Spanish" },
   { label: "Anglès", value: "English" },
   { label: "Euskera", value: "Euskera" },
@@ -92,10 +91,12 @@ export function FloodGuard() {
         selectedMunicipality.nomMunicipi,
         situation,
         severity,
-        audience
+        audience,
+        languages.join(",")
       );
       console.log("Alert generated:", response);
-      setGeneratedAlert(response);
+      console.log("------>",response)
+      setGeneratedAlert(response['Catalan']);
     } catch (error) {
       console.error("Error generating alert:", error);
       alert("Hi ha hagut un error en generar l'alerta.");

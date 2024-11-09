@@ -19,7 +19,7 @@ class PrecipitationSummaryParams(BaseModel):
     alert_message: str = Field(..., description="The alert message")
     severity: str = Field(..., description="The severity of the alert")
     target_audience: str = Field(..., description="The target audience of the alert")
-
+    languages: str = Field(..., description="List of languages, separated by commas")
 
 mock_weather_data_res = " {'origen': {'productor': 'Agencia Estatal de Meteorología - AEMET. Gobierno de España', 'web': 'https://www.aemet.es', 'enlace': 'https://www.aemet.es/es/eltiempo/prediccion/municipios/horas/melide-id15046', 'language': 'es', 'copyright': '© AEMET. Autorizado el uso de la información y su reproducción citando a AEMET como autora de la misma.', 'notaLegal': 'https://www.aemet.es/es/nota_legal'}, 'elaborado': '2024-11-09T06:52:12', 'nombre': 'Melide', 'provincia': 'A Coruña', 'prediccion': {'dia': [{'fecha': '2024-11-10T00:00:00', 'estadoCielo': [{'value': '16n', 'periodo': '00', 'descripcion': 'Cubierto'}], 'precipitacion': [{'value': '5', 'periodo': '00'}], 'probPrecipitacion': [{'value': '85', 'periodo': '0001'}], 'probTormenta': [{'value': '20', 'periodo': '0001'}], 'nieve': [{'value': '0', 'periodo': '00'}], 'probNieve': [{'value': '0', 'periodo': '0001'}], 'temperatura': [{'value': '15', 'periodo': '00'}], 'sensTermica': [{'value': '14', 'periodo': '00'}], 'humedadRelativa': [{'value': '90', 'periodo': '00'}], 'vientoAndRachaMax': [{'direccion': ['O'], 'velocidad': ['10'], 'periodo': '00'}, {'value': '20', 'periodo': '00'}], 'orto': '08:00', 'ocaso': '18:00'}]}, 'id': '15046', 'version': '1.0'}"
 
@@ -121,7 +121,23 @@ async def generate_alert(
         },
     ]
     result = text_generation.generate_text(messages=messages)
+    result += f"\n\nPunts de risc:\n{riskpoints_text}"
+
     _logger.info("Text generation:", result=result)
 
-    result += f"\n\nPunts de risc:\n{riskpoints_text}"
-    return result
+    final_result = {"Catalan": result}
+
+    translation = Translation(
+                base_url="https://o9vasr2oal4oyt2j.us-east-1.aws.endpoints.huggingface.cloud"
+            )
+    
+    if len(params.languages.split(",")) > 0:
+        for language in params.languages.split(","):
+            
+            result_trans = translation.translate_text(
+                src_lang_code="Catalan", tgt_lang_code="English", sentence=result
+            )
+            final_result[language]=result_trans
+ 
+
+    return final_result

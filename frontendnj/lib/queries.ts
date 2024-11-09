@@ -39,7 +39,8 @@ export const sendAlert = async (
   municipeName: string,
   alertMessage: string,
   severity: string,
-  targetAudience: string
+  targetAudience: string,
+  languages: string
 ) => {
   const res = await fetch("http://localhost:8000/generate-alert", {
     method: "POST",
@@ -52,6 +53,7 @@ export const sendAlert = async (
       alert_message: alertMessage,
       severity: severity,
       target_audience: targetAudience,
+      languages: languages,
     }),
   });
   return res.json();
