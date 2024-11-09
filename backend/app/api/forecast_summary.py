@@ -4,16 +4,15 @@ import structlog
 from fastapi import APIRouter, Body
 from pydantic import BaseModel, Field
 
-from app.api.utils.opendata import get_open_data
 from app.clients.models import TextGeneration
+from app.services.opendata import get_open_data
 
 _logger = structlog.get_logger()
 router = APIRouter()
 
 
 class PrecipitationSummaryParams(BaseModel):
-    municipe_code: str = Field(..., description="The code of the municipality")
-    alert_message: str = Field(..., description="The code of the municipality")
+    municipe_code: int = Field(..., description="The code of the municipality")
 
 
 @router.post("/forecast-summary")

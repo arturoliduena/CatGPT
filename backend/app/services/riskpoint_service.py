@@ -1,5 +1,5 @@
 import re
-from typing import List, Dict
+from typing import Dict, List
 
 from app.clients.overpass import Overpass
 from app.repositories.flood_municipality_repository import FloodMunicipalityRepository
@@ -7,8 +7,11 @@ from app.repositories.flood_municipality_repository import FloodMunicipalityRepo
 overpass_client = Overpass()
 flood_municipality_repository = FloodMunicipalityRepository()
 
+
 def get_riskpoint(municipality_code: str) -> List[Dict]:
-    flood_municipality_zones = flood_municipality_repository.get_flood_municipality_zones(municipality_code)
+    flood_municipality_zones = (
+        flood_municipality_repository.get_flood_municipality_zones(municipality_code)
+    )
     print(flood_municipality_zones)
 
     response = []
@@ -25,7 +28,10 @@ def _get_flood_zones_intersection(municipality_code: str) -> str:
 
 
 def parse_geometry_ewkt(geometry_ewkt: str):
-    matches = re.search(r'\(\((.*?)\)\)', geometry_ewkt)
+    matches = re.search(r"\(\((.*?)\)\)", geometry_ewkt)
     if matches:
         coords = matches.group(1)
-        return " ".join(f"{y} {x}" for x, y in (pair.split() for pair in coords.split(',')))
+        return " ".join(
+            f"{y} {x}" for x, y in (pair.split() for pair in coords.split(","))
+        )
+
