@@ -1,5 +1,3 @@
-import json
-
 import structlog
 from fastapi import APIRouter, Body
 from pydantic import BaseModel, Field
@@ -21,14 +19,20 @@ class PrecipitationSummaryParams(BaseModel):
 base_url = "https://hijbc1ux6ie03ouo.us-east-1.aws.endpoints.huggingface.cloud"
 
 
-@router.post("/generate-alert")
-async def generate_alert(params: PrecipitationSummaryParams = Body()):
-    _logger.info("POST /generate-alert", municipe_code=params.municipe_code)
-    open_data = await get_open_data(params.municipe_code)
-    open_data = open_data[0]
-    open_data["prediccion"]["dia"] = [open_data["prediccion"]["dia"][0]]
-    json_text = json.dumps(open_data, indent=4)
-    riskpoints = riskpoint_service.get_riskpoint(params.municipe_code)
+async def fetch_weather_data(municipe_code: str):
+    data = await get_open_data(municipe_code)
+    return data[0]
+
+
+def format_risk_points(municipe_code: str):
+    riskpoints = riskpoint_service.get_riskpoint(municipe_code)
+    return "\n".join(
+        f"{rp['amenity'].capitalize()}: {rp['name']} (Ref: {rp['ref']})"
+        for rp in riskpoints
+    )
+
+
+def translate_docs(base_url):
     # Define a query string to find similar documents
     query = "Quines són les mesures a seguir en cas d'inundació?"
     # Perform the similarity search
@@ -46,13 +50,20 @@ async def generate_alert(params: PrecipitationSummaryParams = Body()):
     similar_docs_text = "\n".join(
         f"{i}. {doc}" for i, doc in enumerate(translated_docs, 1)
     )
-    # Print the results
     for i, doc in enumerate(similar_docs, 1):
         _logger.info("Document", index=i, document=doc.page_content)
-    riskpoints_text = "\n".join(
-        f"{rp['amenity'].capitalize()}: {rp['name']} (Ref: {rp['ref']})"
-        for rp in riskpoints
-    )
+
+    return similar_docs_text
+
+
+@router.post("/generate-alert")
+async def generate_alert(params: PrecipitationSummaryParams = Body()):
+    _logger.info("POST /generate-alert", municipe_code=params.municipe_code)
+    # Fetch data and risk points
+    open_data = await fetch_weather_data(params.municipe_code)
+    _logger.info("Open data", open_data=open_data)
+    riskpoints_text = format_risk_points(params.municipe_code)
+    similar_docs_text = translate_docs(base_url)
     text_generation = TextGeneration(
         base_url=base_url,
     )

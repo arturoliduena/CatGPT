@@ -50,6 +50,7 @@ def mock_data(municipe_code: str, data: dict):
 
 async def get_open_data(municipe_code: str):
     url = f"https://opendata.aemet.es/opendata/api/prediccion/especifica/municipio/horaria/15046"
+    # url = f"https://opendata.aemet.es/opendata/api/prediccion/especifica/municipio/horaria/{municipe_code}"
     headers = {"api_key": settings.open_data_api_key}
     res = requests.get(url, headers=headers)
     res_json = res.json()
