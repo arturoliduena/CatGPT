@@ -13,7 +13,9 @@ router = APIRouter()
 
 class PrecipitationSummaryParams(BaseModel):
     municipe_code: str = Field(..., description="The code of the municipality")
-    alert_message: str = Field(..., description="The code of the municipality")
+    alert_message: str = Field(..., description="The alert message")
+    severity: str = Field(..., description="The severity of the alert")
+    target_audience: str = Field(..., description="The target audience of the alert")
 
 
 async def fetch_weather_data(municipe_code: str):
