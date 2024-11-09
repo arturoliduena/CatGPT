@@ -29,6 +29,7 @@ import {
   POI,
   sendAlert,
 } from "@/lib/queries";
+import { ClipLoader } from "react-spinners";
 
 // Placeholder function for fetching dynamic metrics
 const fetchDynamicMetrics = async (city: string) => {
@@ -77,8 +78,10 @@ export function FloodGuard() {
 
   const [selectedMunicipality, setSelectedMunicipality] =
     useState<Municipality>();
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const handleGenerateAlert = async () => {
+    setIsGenerating(true);
     let hasError = false;
 
     if (!selectedMunicipality) {
@@ -99,6 +102,7 @@ export function FloodGuard() {
     }
 
     if (hasError || !selectedMunicipality) {
+      setIsGenerating(false);
       return;
     }
 
@@ -115,6 +119,8 @@ export function FloodGuard() {
     } catch (error) {
       console.error("Error generating alert:", error);
       alert("Hi ha hagut un error en generar l'alerta.");
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -228,8 +234,17 @@ export function FloodGuard() {
                 maxCount={3}
               />
             </div>
-            <Button onClick={handleGenerateAlert} className="w-full">
-              <Send className="mr-2 h-4 w-4" /> Generar Alerta
+            <Button
+              onClick={handleGenerateAlert}
+              className="w-full"
+              disabled={isGenerating}
+            >
+              {isGenerating ? (
+                <ClipLoader size={20} color={"#ffffff"} />
+              ) : (
+                <Send className="mr-2 h-4 w-4" />
+              )}
+              Generar Alerta
             </Button>
             {generatedAlert && (
               <div className="mt-4 p-4 bg-yellow-100 rounded-lg border border-yellow-300">
