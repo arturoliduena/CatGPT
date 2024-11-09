@@ -16,9 +16,6 @@ class PrecipitationSummaryParams(BaseModel):
     alert_message: str = Field(..., description="The code of the municipality")
 
 
-base_url = "https://hijbc1ux6ie03ouo.us-east-1.aws.endpoints.huggingface.cloud"
-
-
 async def fetch_weather_data(municipe_code: str):
     data = await get_open_data(municipe_code)
     return data[0]
@@ -26,13 +23,10 @@ async def fetch_weather_data(municipe_code: str):
 
 def format_risk_points(municipe_code: str):
     riskpoints = riskpoint_service.get_riskpoint(municipe_code)
-    return "\n".join(
-        f"{rp['amenity'].capitalize()}: {rp['name']}"
-        for rp in riskpoints
-    )
+    return "\n".join(f"{rp['amenity'].capitalize()}: {rp['name']}" for rp in riskpoints)
 
 
-def translate_docs(base_url):
+def translate_docs():
     # Define a query string to find similar documents
     query = "Quines són les mesures a seguir en cas d'inundació?"
     # Perform the similarity search
@@ -40,7 +34,9 @@ def translate_docs(base_url):
     translated_docs = []
     for doc in similar_docs:
         translated_docs.append(
-            Translation(base_url=base_url).translate_text(
+            Translation(
+                base_url="https://o9vasr2oal4oyt2j.us-east-1.aws.endpoints.huggingface.cloud"
+            ).translate_text(
                 src_lang_code="Catalan",
                 tgt_lang_code="English",
                 sentence=doc.page_content,
@@ -60,18 +56,15 @@ def translate_docs(base_url):
 async def generate_alert(params: PrecipitationSummaryParams = Body()):
     _logger.info("POST /generate-alert", municipe_code=params.municipe_code)
     # Fetch data and risk points
-    _logger.info("Get weather data...")
     open_data = await fetch_weather_data(params.municipe_code)
-    _logger.info("Open data", open_data=open_data)
 
-    _logger.info("Get risk points...")
     riskpoints_text = format_risk_points(params.municipe_code)
 
-    _logger.info("Translate documents...")
-    similar_docs_text = translate_docs(base_url)
+    similar_docs_text = translate_docs()
 
-    _logger.info("Generating text...")
-    text_generation = TextGeneration(base_url)
+    text_generation = TextGeneration(
+        base_url="https://hijbc1ux6ie03ouo.us-east-1.aws.endpoints.huggingface.cloud",
+    )
 
     # Define a more structured, human-readable system message
     system_message = (
