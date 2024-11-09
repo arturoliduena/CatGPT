@@ -1,10 +1,14 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
-import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
 import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -12,37 +16,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-} from "@/components/ui/command";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
-import {
-  AlertTriangle,
-  Check,
-  ChevronsUpDown,
-  MapPin,
-  Languages,
-  Send,
-  Shield,
-} from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Municipalities } from "./municipalities";
+import { Textarea } from "@/components/ui/textarea";
+import { Send, Shield } from "lucide-react";
 import dynamic from "next/dynamic";
+import { useMemo, useState } from "react";
+import { Municipalities, Bbox } from "./municipalities";
+import { MultiSelect } from "./ui/multi-select";
 
 // Placeholder function for fetching dynamic metrics
 const fetchDynamicMetrics = async (city: string) => {
@@ -65,9 +44,14 @@ const generateAlertWithLLM = async (
 };
 
 const languageOptions = [
-  { label: "Catalan", value: "Catalan" },
-  { label: "Spanish", value: "Spanish" },
-  { label: "English", value: "English" },
+  { label: "Catalan", value: "Català" },
+  { label: "Spanish", value: "Espanyol" },
+  { label: "English", value: "Anglès" },
+  { label: "Euskera", value: "Euskera" },
+  { label: "Galician", value: "Gallec" },
+  { label: "Aranese", value: "Aranès" },
+  { label: "Aragonese", value: "Aragonès" },
+  { label: "Asturian", value: "Asturià" },
 ];
 
 export function FloodGuard() {
@@ -77,7 +61,10 @@ export function FloodGuard() {
   const [audience, setAudience] = useState("general");
   const [languages, setLanguages] = useState<string[]>([]);
   const [generatedAlert, setGeneratedAlert] = useState("");
-  const [openLanguages, setOpenLanguages] = useState(false);
+  const [bounds, setBounds] = useState<[[number, number], [number, number]]>([
+    [41.324, 2.083],
+    [41.424, 2.223],
+  ]);
 
   const handleGenerateAlert = async () => {
     const metrics = await fetchDynamicMetrics(city);
@@ -88,6 +75,13 @@ export function FloodGuard() {
       customizations
     );
     setGeneratedAlert(alert);
+  };
+
+  const handleSelectMunicipality = (bbox: Bbox) => {
+    setBounds([
+      [bbox.ymin, bbox.xmin],
+      [bbox.ymax, bbox.xmax],
+    ]);
   };
 
   const Map = useMemo(
@@ -118,7 +112,9 @@ export function FloodGuard() {
                 Ciutat
               </Label>
               <div className="flex mt-1 space-x-2">
-                <Municipalities />
+                <Municipalities
+                  onSelectMunicipality={handleSelectMunicipality}
+                />
               </div>
             </div>
             <div>
@@ -175,59 +171,15 @@ export function FloodGuard() {
               <Label htmlFor="languages" className="text-lg font-semibold">
                 Opcions de Traducció
               </Label>
-              <Popover open={openLanguages} onOpenChange={setOpenLanguages}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={openLanguages}
-                    className="w-full justify-between mt-1"
-                  >
-                    <Languages className="mr-2 h-4 w-4" />
-                    {Array.isArray(languages) && languages.length > 0
-                      ? `${languages.length} seleccionats`
-                      : "Seleccioneu idiomes..."}
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-full p-0">
-                  <Command>
-                    <CommandInput placeholder="Cerca idiomes..." />
-                    <CommandEmpty>No s'ha trobat cap idioma.</CommandEmpty>
-                    <CommandGroup>
-                      {languageOptions.map((language) => (
-                        <CommandItem
-                          key={language.value}
-                          onSelect={() => {
-                            setLanguages((prev) => {
-                              const newLanguages = Array.isArray(prev)
-                                ? prev
-                                : [];
-                              return newLanguages.includes(language.value)
-                                ? newLanguages.filter(
-                                    (l) => l !== language.value
-                                  )
-                                : [...newLanguages, language.value];
-                            });
-                            setOpenLanguages(true);
-                          }}
-                        >
-                          <Check
-                            className={cn(
-                              "mr-2 h-4 w-4",
-                              Array.isArray(languages) &&
-                                languages.includes(language.value)
-                                ? "opacity-100"
-                                : "opacity-0"
-                            )}
-                          />
-                          {language.label}
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </Command>
-                </PopoverContent>
-              </Popover>
+              <MultiSelect
+                options={languageOptions}
+                onValueChange={setLanguages}
+                defaultValue={languages}
+                placeholder="Seleccioneu els idiomes"
+                variant="inverted"
+                animation={2}
+                maxCount={3}
+              />
             </div>
             <Button onClick={handleGenerateAlert} className="w-full">
               <Send className="mr-2 h-4 w-4" /> Generar Alerta
@@ -244,7 +196,7 @@ export function FloodGuard() {
         </Card>
       </div>
       <div className="w-1/2 h-screen">
-        <Map />
+        <Map initialBounds={bounds} />
       </div>
     </div>
   );

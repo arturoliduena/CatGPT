@@ -5,33 +5,34 @@ import "leaflet-defaulticon-compatibility";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
 
 const MapComponent = ({
-  center,
-  zoom,
+  bounds,
 }: {
-  center: [number, number];
-  zoom: number;
+  bounds: [[number, number], [number, number]];
 }) => {
   const map = useMap();
   useEffect(() => {
-    map.setView(center, zoom);
-  }, [center, zoom, map]);
+    map.fitBounds(bounds);
+  }, [bounds, map]);
   return null;
 };
-export default function MyMap() {
-  const [center, setCenter] = useState<[number, number]>([41.3874, 2.1686]); // Barcelona coordinates
+export default function MyMap({
+  initialBounds,
+}: {
+  initialBounds: [number, number][];
+}) {
+  const [bounds, setBounds] = useState<[number, number][]>(initialBounds);
+
+  useEffect(() => {
+    setBounds(initialBounds);
+  }, [initialBounds]);
 
   return (
-    <MapContainer
-      center={center}
-      zoom={10}
-      style={{ height: "100%", width: "100%" }}
-    >
+    <MapContainer bounds={bounds} style={{ height: "100%", width: "100%" }}>
       <TileLayer
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
       />
-      <Marker position={center} />
-      <MapComponent center={center} zoom={10} />
+      <MapComponent bounds={bounds} />
     </MapContainer>
   );
 }

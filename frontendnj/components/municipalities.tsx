@@ -43,12 +43,29 @@ const m = [
   },
 ];
 
-export function Municipalities() {
+export type Bbox = {
+  xmin: number;
+  ymin: number;
+  xmax: number;
+  ymax: number;
+};
+
+type Municipality = {
+  codiMunicipi: string;
+  nomMunicipi: string;
+  bbox: Bbox;
+};
+
+type MunicipalitiesProps = {
+  onSelectMunicipality: (bbox: Bbox) => void;
+};
+
+export function Municipalities({ onSelectMunicipality }: MunicipalitiesProps) {
   const [open, setOpen] = React.useState(false);
   const [value, setValue] = React.useState("");
-  const [municipalities, setMunicipalities] = React.useState<
-    [string, string][]
-  >([]);
+  const [municipalities, setMunicipalities] = React.useState<Municipality[]>(
+    []
+  );
 
   React.useEffect(() => {
     fetchMunicipalities().then((data) => {
@@ -67,8 +84,8 @@ export function Municipalities() {
         >
           {value
             ? municipalities.find(
-                (municipality) => municipality[0] === value
-              )?.[1]
+                (municipality) => municipality.codiMunicipi === value
+              )?.nomMunicipi
             : "Selecciona una municipalitat..."}
           <ChevronsUpDown className="opacity-50" />
         </Button>
@@ -81,30 +98,33 @@ export function Municipalities() {
             <CommandGroup>
               {municipalities.map((municipality) => (
                 <CommandItem
-                  key={municipality[0]}
-                  value={municipality[1]}
+                  key={municipality.codiMunicipi}
+                  value={municipality.nomMunicipi}
                   onSelect={(currentValue) => {
                     /* Find the value of the selected municipality */
                     const selectedMunicipality = municipalities.find(
-                      (mun) => mun[1] === currentValue
+                      (mun) => mun.nomMunicipi === currentValue
                     );
 
                     if (!selectedMunicipality) {
                       return;
                     }
                     setValue(
-                      selectedMunicipality[0] === value
+                      selectedMunicipality.codiMunicipi === value
                         ? ""
-                        : selectedMunicipality[0]
+                        : selectedMunicipality.codiMunicipi
                     );
                     setOpen(false);
+                    onSelectMunicipality(selectedMunicipality.bbox);
                   }}
                 >
-                  {municipality[1]}
+                  {municipality.nomMunicipi}
                   <Check
                     className={cn(
                       "ml-auto",
-                      value === municipality[0] ? "opacity-100" : "opacity-0"
+                      value === municipality.codiMunicipi
+                        ? "opacity-100"
+                        : "opacity-0"
                     )}
                   />
                 </CommandItem>
