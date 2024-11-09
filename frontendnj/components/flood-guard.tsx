@@ -22,7 +22,7 @@ import dynamic from "next/dynamic";
 import { useMemo, useState } from "react";
 import { Municipalities, Municipality } from "./municipalities";
 import { MultiSelect } from "./ui/multi-select";
-import { sendAlert } from "@/lib/queries";
+import { fetchFloodZones, FloodableZone, sendAlert } from "@/lib/queries";
 
 // Placeholder function for fetching dynamic metrics
 const fetchDynamicMetrics = async (city: string) => {
@@ -65,6 +65,8 @@ export function FloodGuard() {
     [41.324, 2.083],
     [41.424, 2.223],
   ]);
+
+  const [floodableZones, setFloodableZones] = useState<FloodableZone[]>()
   const [selectedMunicipality, setSelectedMunicipality] =
     useState<Municipality>();
 
@@ -107,12 +109,14 @@ export function FloodGuard() {
     }
   };
 
-  const handleSelectMunicipality = (municipality: Municipality) => {
+  const handleSelectMunicipality =async (municipality: Municipality) => {
     setBounds([
       [municipality.bbox.ymin, municipality.bbox.xmin],
       [municipality.bbox.ymax, municipality.bbox.xmax],
     ]);
     setSelectedMunicipality(municipality);
+    const floodZonesResult = await fetchFloodZones(municipality.codiMunicipi)
+    setFloodableZones(floodZonesResult)
   };
 
   const Map = useMemo(
@@ -227,7 +231,7 @@ export function FloodGuard() {
         </Card>
       </div>
       <div className="w-1/2 h-screen">
-        <Map initialBounds={bounds} />
+        <Map initialBounds={bounds} floodableZones={floodableZones} />
       </div>
     </div>
   );
