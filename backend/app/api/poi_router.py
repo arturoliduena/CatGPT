@@ -6,6 +6,14 @@ from app.core.supabase_con.connect import connect
 _logger = structlog.get_logger()
 router = APIRouter()
 
+def get_poi_list_for_LLM(municipality_code: str):
+    conn = connect()
+    cur = conn.cursor()
+
+    cur.execute(f"SELECT codimuni, nommuni, amenity, name, intersects_floodzone FROM public.poi where codimuni = '{municipality_code}'")
+    result = cur.fetchall()
+    return result
+
 @router.get("/municipalities/{municipality_code}/poi")
 async def municipalities(municipality_code: str = Path(...)):
     _logger.info("GET /poi")
