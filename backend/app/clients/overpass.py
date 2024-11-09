@@ -11,6 +11,20 @@ class OverpassSettings(BaseSettings):
 
 class Overpass:
 
+    AMENITY_LIST = [
+        "school",
+        "college",
+        "kindergarten",
+        "library",
+        "university",
+        "clinic",
+        "hospital",
+        "veterinary",
+        "cinema",
+        "place_of_worship",
+        "refugee_site"
+    ]
+
     def __init__(
             self,
             settings: OverpassSettings = OverpassSettings(),
@@ -18,15 +32,19 @@ class Overpass:
         self.overpass_url = settings.overpass_url
 
     def get_overpass_elements(self, polygon: str) -> List[Dict]:
-        url = self._build_base_url() + f'(poly:"{polygon}");out;'
+        url = self._build_url(polygon)
         response = requests.get(url)
         if response.status_code == 200:
             return self._parse_response(response.json())
         else:
             return []
 
-    def _build_base_url(self) -> str:
-        return f'{self.overpass_url}/api/interpreter?data=[out:json][timeout:25000];nwr["amenity"="school"]'
+    def _build_url(self, polygon: str) -> str:
+        url = f'{self.overpass_url}/api/interpreter?data=[out:json][timeout:25000];('
+        for amenity in self.AMENITY_LIST:
+            url += f'nwr["amenity"="{amenity}"](poly:"{polygon}");'
+        url += ");out center;"
+        return url
 
     def _parse_response(self, response: Dict) -> List[Dict]:
         _elements = response.get("elements")
