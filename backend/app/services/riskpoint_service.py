@@ -10,7 +10,6 @@ _logger = structlog.get_logger()
 overpass_client = Overpass()
 flood_municipality_repository = FloodMunicipalityRepository()
 
-
 def get_riskpoint(municipality_code: str) -> List[Dict]:
     flood_municipality_zones = flood_municipality_repository.get_flood_municipality_zones(municipality_code)
     riskpoints = []
