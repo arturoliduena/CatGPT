@@ -36,6 +36,7 @@ export const fetchPOI = async (codeMunicipality: string) => {
 
 export const sendAlert = async (
   municipeCode: string,
+  municipeName: string,
   alertMessage: string,
   severity: string,
   targetAudience: string
@@ -47,6 +48,7 @@ export const sendAlert = async (
     },
     body: JSON.stringify({
       municipe_code: municipeCode,
+      municipe_name: municipeName,
       alert_message: alertMessage,
       severity: severity,
       target_audience: targetAudience,

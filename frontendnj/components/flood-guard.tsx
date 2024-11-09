@@ -22,7 +22,13 @@ import dynamic from "next/dynamic";
 import { useMemo, useState } from "react";
 import { Municipalities, Municipality } from "./municipalities";
 import { MultiSelect } from "./ui/multi-select";
-import { fetchFloodZones, fetchPOI, FloodableZone, POI, sendAlert } from "@/lib/queries";
+import {
+  fetchFloodZones,
+  fetchPOI,
+  FloodableZone,
+  POI,
+  sendAlert,
+} from "@/lib/queries";
 
 // Placeholder function for fetching dynamic metrics
 const fetchDynamicMetrics = async (city: string) => {
@@ -66,8 +72,8 @@ export function FloodGuard() {
     [41.424, 2.223],
   ]);
 
-  const [floodableZones, setFloodableZones] = useState<FloodableZone[]>([])
-  const [poi, setPoi] = useState<POI[]>([])
+  const [floodableZones, setFloodableZones] = useState<FloodableZone[]>([]);
+  const [poi, setPoi] = useState<POI[]>([]);
 
   const [selectedMunicipality, setSelectedMunicipality] =
     useState<Municipality>();
@@ -99,6 +105,7 @@ export function FloodGuard() {
     try {
       const response = await sendAlert(
         selectedMunicipality.codiMunicipi,
+        selectedMunicipality.nomMunicipi,
         situation,
         severity,
         audience
@@ -111,19 +118,17 @@ export function FloodGuard() {
     }
   };
 
-  const handleSelectMunicipality =async (municipality: Municipality) => {
+  const handleSelectMunicipality = async (municipality: Municipality) => {
     setBounds([
       [municipality.bbox.ymin, municipality.bbox.xmin],
       [municipality.bbox.ymax, municipality.bbox.xmax],
     ]);
     setSelectedMunicipality(municipality);
-    const floodZonesResult = await fetchFloodZones(municipality.codiMunicipi)
-    setFloodableZones(floodZonesResult)
-    
-    const poiResult = await fetchPOI(municipality.codiMunicipi)
-    setPoi(poiResult)
-    
-    
+    const floodZonesResult = await fetchFloodZones(municipality.codiMunicipi);
+    setFloodableZones(floodZonesResult);
+
+    const poiResult = await fetchPOI(municipality.codiMunicipi);
+    setPoi(poiResult);
   };
 
   const Map = useMemo(
@@ -238,7 +243,7 @@ export function FloodGuard() {
         </Card>
       </div>
       <div className="w-1/2 h-screen">
-        <Map initialBounds={bounds} floodableZones={floodableZones} poi={poi}/>
+        <Map initialBounds={bounds} floodableZones={floodableZones} poi={poi} />
       </div>
     </div>
   );
