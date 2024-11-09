@@ -12,6 +12,9 @@ async def municipalities():
     conn = connect()
     cur = conn.cursor()
 
-    cur.execute('SELECT codimuni, nommuni FROM municipalities')
-    result = cur.fetchall()
+    cur.execute('SELECT codimuni, nommuni, ST_Extent(wkb_geometry) as bbox FROM municipalities group by codimuni, nommuni')
+    data = cur.fetchall()
+    result = []
+    for muni in data:
+        result.append({"codiMunicipi": muni[0], "nomMunicipi": muni[1], "bbox": muni[2]})
     return result
