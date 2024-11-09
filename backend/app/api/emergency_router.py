@@ -1,7 +1,7 @@
 import json
 
 import structlog
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Body
 from pydantic import BaseModel, Field
 
 from app.api.utils.opendata import get_open_data
@@ -17,10 +17,9 @@ class PrecipitationSummaryParams(BaseModel):
     alert_message: str = Field(..., description="The code of the municipality")
 
 
-
 @router.post("/forecast-summary")
-async def get_forecast_summary(params: PrecipitationSummaryParams = Depends()):
-    _logger.info("GET /forcast-summary", municipe_code=params.municipe_code)
+async def post_forecast_summary(params: PrecipitationSummaryParams = Body()):
+    _logger.info("POST /forcast-summary", municipe_code=params.municipe_code)
     open_data = await get_open_data(params.municipe_code)
     open_data = open_data[0]
     open_data["prediccion"]["dia"] = [open_data["prediccion"]["dia"][0]]
@@ -54,13 +53,13 @@ async def get_forecast_summary(params: PrecipitationSummaryParams = Depends()):
     ]
     return text_generation.generate_text(messages=messages)
 
+
 @router.get("/municipalities")
 async def municipalities():
     _logger.info("GET /municipalities")
     conn = connect()
     cur = conn.cursor()
 
-    cur.execute('SELECT codimuni, nommuni FROM municipalities')
-    result = cur.fetchall() 
+    cur.execute("SELECT codimuni, nommuni FROM municipalities")
+    result = cur.fetchall()
     return result
-
