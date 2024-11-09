@@ -20,8 +20,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Send, Shield } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useMemo, useState } from "react";
-import { Municipalities, Bbox } from "./municipalities";
+import { Municipalities, Municipality } from "./municipalities";
 import { MultiSelect } from "./ui/multi-select";
+import { sendAlert } from "@/lib/queries";
 
 // Placeholder function for fetching dynamic metrics
 const fetchDynamicMetrics = async (city: string) => {
@@ -44,18 +45,17 @@ const generateAlertWithLLM = async (
 };
 
 const languageOptions = [
-  { label: "Catalan", value: "Català" },
-  { label: "Spanish", value: "Espanyol" },
-  { label: "English", value: "Anglès" },
+  { label: "Català", value: "Catalan" },
+  { label: "Espanyol", value: "Spanish" },
+  { label: "Anglès", value: "English" },
   { label: "Euskera", value: "Euskera" },
-  { label: "Galician", value: "Gallec" },
-  { label: "Aranese", value: "Aranès" },
-  { label: "Aragonese", value: "Aragonès" },
-  { label: "Asturian", value: "Asturià" },
+  { label: "Gallec", value: "Galician" },
+  { label: "Aranès", value: "Aranese" },
+  { label: "Aragonès", value: "Aragonese" },
+  { label: "Asturià", value: "Asturian" },
 ];
 
 export function FloodGuard() {
-  const [city, setCity] = useState("Barcelona");
   const [situation, setSituation] = useState("");
   const [severity, setSeverity] = useState("moderate");
   const [audience, setAudience] = useState("general");
@@ -65,23 +65,54 @@ export function FloodGuard() {
     [41.324, 2.083],
     [41.424, 2.223],
   ]);
+  const [selectedMunicipality, setSelectedMunicipality] =
+    useState<Municipality>();
 
   const handleGenerateAlert = async () => {
-    const metrics = await fetchDynamicMetrics(city);
-    const customizations = { city, severity, audience };
-    const alert = await generateAlertWithLLM(
-      situation,
-      metrics,
-      customizations
-    );
-    setGeneratedAlert(alert);
+    let hasError = false;
+
+    if (!selectedMunicipality) {
+      alert("Seleccioneu una ciutat.");
+      hasError = true;
+    }
+    if (!situation) {
+      alert("Descriviu la situació d'inundació.");
+      hasError = true;
+    }
+    if (!severity) {
+      alert("Seleccioneu la severitat de l'alerta.");
+      hasError = true;
+    }
+    if (!audience) {
+      alert("Seleccioneu el públic objectiu.");
+      hasError = true;
+    }
+
+    if (hasError || !selectedMunicipality) {
+      return;
+    }
+
+    try {
+      const response = await sendAlert(
+        selectedMunicipality.codiMunicipi,
+        situation,
+        severity,
+        audience
+      );
+      console.log("Alert generated:", response);
+      setGeneratedAlert(response);
+    } catch (error) {
+      console.error("Error generating alert:", error);
+      alert("Hi ha hagut un error en generar l'alerta.");
+    }
   };
 
-  const handleSelectMunicipality = (bbox: Bbox) => {
+  const handleSelectMunicipality = (municipality: Municipality) => {
     setBounds([
-      [bbox.ymin, bbox.xmin],
-      [bbox.ymax, bbox.xmax],
+      [municipality.bbox.ymin, municipality.bbox.xmin],
+      [municipality.bbox.ymax, municipality.bbox.xmax],
     ]);
+    setSelectedMunicipality(municipality);
   };
 
   const Map = useMemo(
@@ -96,7 +127,7 @@ export function FloodGuard() {
   return (
     <div className="flex h-screen bg-gray-100">
       <div className="w-1/2 p-4 overflow-y-auto">
-        <Card className="shadow-lg h-full">
+        <Card className="shadow-lg h-full overflow-y-auto">
           <CardHeader className="bg-primary text-primary-foreground">
             <CardTitle className="text-2xl flex items-center">
               <Shield className="mr-2" /> FloodGuard: Sistema d'Alerta
@@ -106,7 +137,7 @@ export function FloodGuard() {
               Protegiu la vostra comunitat amb alertes d'inundació a temps
             </CardDescription>
           </CardHeader>
-          <CardContent className="mt-4 space-y-6">
+          <CardContent className="mt-4 space-y-6 overflow-y-auto">
             <div>
               <Label htmlFor="city" className="text-lg font-semibold">
                 Ciutat

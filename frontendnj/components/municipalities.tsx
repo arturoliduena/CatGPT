@@ -50,14 +50,14 @@ export type Bbox = {
   ymax: number;
 };
 
-type Municipality = {
+export type Municipality = {
   codiMunicipi: string;
   nomMunicipi: string;
   bbox: Bbox;
 };
 
 type MunicipalitiesProps = {
-  onSelectMunicipality: (bbox: Bbox) => void;
+  onSelectMunicipality: (municipality: Municipality) => void;
 };
 
 export function Municipalities({ onSelectMunicipality }: MunicipalitiesProps) {
@@ -115,7 +115,7 @@ export function Municipalities({ onSelectMunicipality }: MunicipalitiesProps) {
                         : selectedMunicipality.codiMunicipi
                     );
                     setOpen(false);
-                    onSelectMunicipality(selectedMunicipality.bbox);
+                    onSelectMunicipality(selectedMunicipality);
                   }}
                 >
                   {municipality.nomMunicipi}

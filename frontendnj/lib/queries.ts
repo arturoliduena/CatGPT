@@ -9,7 +9,7 @@ export const sendAlert = async (
   severity: string,
   targetAudience: string
 ) => {
-  const res = await fetch("http://localhost:8000/municipalities", {
+  const res = await fetch("http://localhost:8000/generate-alert", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
