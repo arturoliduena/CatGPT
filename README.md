@@ -2,6 +2,7 @@
 
 ### Stack
 
+docling per parsejar PDFs
 #### Backend
 
 - FastAPI

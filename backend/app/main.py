@@ -6,6 +6,8 @@ from app.api.generate_alert import router as generate_alert_router
 from app.api.municipality_router import router as municipality_router
 from app.api.riskpoint_router import router as riskpoint_router
 from app.api.poi_router import router as poi_router
+from app.api.floodzones import router as floodzones_router
+
 
 
 app = FastAPI(title="CatGPT API", debug=True, version="1.0.0")
@@ -26,4 +28,5 @@ app.include_router(riskpoint_router, tags=["riskpoint"])
 app.include_router(generate_alert_router, tags=["generate_alert"])
 app.include_router(municipality_router, tags=["municipality"])
 app.include_router(poi_router, tags=["poi"])
+app.include_router(floodzones_router, tags=["floodzones"])
 
