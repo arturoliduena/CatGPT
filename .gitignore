@@ -167,3 +167,6 @@ milvus.db
 .milvus.db.lock
 .DS_Store
 *.wav
+
+.next
+node_modules
